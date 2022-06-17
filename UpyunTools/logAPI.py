@@ -1,9 +1,16 @@
 import json, requests, gzip, os, re
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse
 
 
 def download(token, bucketName, domain, date):
+    """
+    :param token: UPYUN Token
+    :param bucketName: UPYUN bucket service name
+    :param domain: Domain associated with the bucket
+    :param date: Target date of the log e.g. 2013-10-30
+    :return: A list of downloaded files' path
+    """
     file_downloaded = []
     print("token:" + token)
     headers = {"Authorization": "Bearer " + token}
@@ -29,6 +36,10 @@ def download(token, bucketName, domain, date):
 
 
 def EscapeLog(fileName):
+    """
+    :param fileName: The log file path
+    :return: Records of log in this file in a list
+    """
     result = []
     for line in open(fileName):
         split = line.split(' ')
@@ -105,9 +116,25 @@ def EscapeLog(fileName):
     return result
 
 
-def SaveSQL(fileList):
-    for file in fileList:
-        print(file)
+def SaveSQL(EscapeLogDict, db):
+    SQL_statement = r"INSERT INTO log(RemoteAddr, RemoteUser, TimeLocal, TimeZone, RequestMethod, Schema, HTTPHost," \
+                    r"Uri, QueryString, ServerProtocol, Status, BodyBytesSent, Referer, HTTPUserAgent, ContentType" \
+                    r"RequestContentLength, CacheHit, SourceCode, IsDynamic, CacheControl, RequestTime, EdgeServerIP) " \
+                    r"VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    data = db.insertone(SQL_statement,
+                        param=(EscapeLogDict["RemoteAddr"], EscapeLogDict["RemoteUser"], EscapeLogDict["TimeLocal"],
+                               EscapeLogDict["TimeZone"], EscapeLogDict["RequestMethod"], EscapeLogDict["Schema"],
+                               EscapeLogDict["HTTPHost"], EscapeLogDict["Uri"], EscapeLogDict["QueryString"],
+                               EscapeLogDict["ServerProtocol"], EscapeLogDict["Status"], EscapeLogDict["BodyBytesSent"],
+                               EscapeLogDict["Referer"], EscapeLogDict["HTTPUserAgent"], EscapeLogDict["ContentType"],
+                               EscapeLogDict["RequestContentLength"], EscapeLogDict["CacheHit"], EscapeLogDict["SourceCode"],
+                               EscapeLogDict["IsDynamic"], EscapeLogDict["CacheControl"], EscapeLogDict["RequestTime"],
+                               EscapeLogDict["EdgeServerIP"]))
+    if str(data) == "1":
+        print("写入数据成功")
+    else:
+        print("写入数据失败 " + str(datetime.utcnow().replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=8)))))
+        print(str(data))
 
 
 EscapeLog("../data/17_00-blogpic.irain.in-8420802881497378793.log")
