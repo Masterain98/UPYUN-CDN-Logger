@@ -77,7 +77,7 @@ def EscapeLog(fileName):
         SourceCode = split2[-4]
         if "hit" in split2[-5].lower():
             CacheHit = "HIT"
-            RequestContentLength = split2[-5].replace("Hit", "").replace(" ","")
+            RequestContentLength = split2[-5].replace("Hit", "").replace(" ", "")
         elif "miss" in split2[-5].lower():
             CacheHit = "MISS"
             RequestContentLength = split2[-5].replace("Miss", "").replace(" ", "")
@@ -98,11 +98,11 @@ def EscapeLog(fileName):
             "HTTPHost": str(HTTPHost),
             "QueryString": QueryString,
             "Uri": Uri,
-            "ServerProtocol":ServerProtocol,
+            "ServerProtocol": ServerProtocol,
             "HTTPStatus": HTTPStatus,
             "BodyBytesSent": BodyBytesSent,
-            "HTTPReferer": HTTPReferer,
-            "HTTPUserAgent": HTTPUserAgent,
+            "HTTPReferer": HTTPReferer[0:1000],
+            "HTTPUserAgent": HTTPUserAgent[0:1000],
             "ContentType": ContentType,
             "RequestContentLength": RequestContentLength,
             "CacheHit": CacheHit,
@@ -117,24 +117,33 @@ def EscapeLog(fileName):
 
 
 def SaveSQL(EscapeLogDict, db):
-    SQL_statement = r"INSERT INTO log(RemoteAddr, RemoteUser, TimeLocal, TimeZone, RequestMethod, Schema, HTTPHost," \
-                    r"Uri, QueryString, ServerProtocol, Status, BodyBytesSent, Referer, HTTPUserAgent, ContentType" \
+    SQL_statement = r"INSERT INTO log(RemoteAddr, RemoteUser, TimeLocal, TimeZone, RequestMethod, Scheme, HTTPHost, " \
+                    r"Uri, QueryString, ServerProtocol, Status, BodyBytesSent, Referer, HTTPUserAgent, ContentType, " \
                     r"RequestContentLength, CacheHit, SourceCode, IsDynamic, CacheControl, RequestTime, EdgeServerIP) " \
                     r"VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
     data = db.insertone(SQL_statement,
                         param=(EscapeLogDict["RemoteAddr"], EscapeLogDict["RemoteUser"], EscapeLogDict["TimeLocal"],
-                               EscapeLogDict["TimeZone"], EscapeLogDict["RequestMethod"], EscapeLogDict["Schema"],
+                               EscapeLogDict["TimeZone"], EscapeLogDict["RequestMethod"], EscapeLogDict["Scheme"],
                                EscapeLogDict["HTTPHost"], EscapeLogDict["Uri"], EscapeLogDict["QueryString"],
-                               EscapeLogDict["ServerProtocol"], EscapeLogDict["Status"], EscapeLogDict["BodyBytesSent"],
-                               EscapeLogDict["Referer"], EscapeLogDict["HTTPUserAgent"], EscapeLogDict["ContentType"],
-                               EscapeLogDict["RequestContentLength"], EscapeLogDict["CacheHit"], EscapeLogDict["SourceCode"],
+                               EscapeLogDict["ServerProtocol"], EscapeLogDict["HTTPStatus"],
+                               EscapeLogDict["BodyBytesSent"],
+                               EscapeLogDict["HTTPReferer"], EscapeLogDict["HTTPUserAgent"],
+                               EscapeLogDict["ContentType"],
+                               EscapeLogDict["RequestContentLength"], EscapeLogDict["CacheHit"],
+                               EscapeLogDict["SourceCode"],
                                EscapeLogDict["IsDynamic"], EscapeLogDict["CacheControl"], EscapeLogDict["RequestTime"],
                                EscapeLogDict["EdgeServerIP"]))
     if str(data) == "1":
         print("写入数据成功")
     else:
         print("写入数据失败 " + str(datetime.utcnow().replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=8)))))
-        print(str(data))
-
-
-EscapeLog("../data/17_00-blogpic.irain.in-8420802881497378793.log")
+        print(SQL_statement % (
+            str(EscapeLogDict["RemoteAddr"]), str(EscapeLogDict["RemoteUser"]), str(EscapeLogDict["TimeLocal"]),
+            str(EscapeLogDict["TimeZone"]), str(EscapeLogDict["RequestMethod"]), str(EscapeLogDict["Scheme"]),
+            str(EscapeLogDict["HTTPHost"]), str(EscapeLogDict["Uri"]), str(EscapeLogDict["QueryString"]),
+            str(EscapeLogDict["ServerProtocol"]), str(EscapeLogDict["HTTPStatus"]), str(EscapeLogDict["BodyBytesSent"]),
+            str(EscapeLogDict["HTTPReferer"]), str(EscapeLogDict["HTTPUserAgent"]), str(EscapeLogDict["ContentType"]),
+            str(EscapeLogDict["RequestContentLength"]), str(EscapeLogDict["CacheHit"]),
+            str(EscapeLogDict["SourceCode"]),
+            str(EscapeLogDict["IsDynamic"]), str(EscapeLogDict["CacheControl"]), str(EscapeLogDict["RequestTime"]),
+            str(EscapeLogDict["EdgeServerIP"])))
