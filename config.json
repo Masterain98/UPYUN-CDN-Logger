@@ -1,0 +1,15 @@
+{
+    "UPYUN_Token": "YourUPYUNToken",
+    "UPYUN_Username": "YourUPYUNUserName",
+    "UPYUN_Password": "YourUPYUNPassword",
+    "CDN_Resource": [["sampleResource1", "SampleResource1-domain"],
+        ["sampleResource2", "sampleResource2-domain"]],
+    "LogOperation": "delete",
+      "db_config": {
+        "dbAddress":"172.17.0.1",
+        "dbPort": 3306,
+        "dbName": "UPYUN-log",
+        "dbUser": "UPYUN-log",
+        "dbPassword": "UPYUN-log"
+      }
+}
