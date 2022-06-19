@@ -23,8 +23,13 @@ def get(username, password):
 
 
 def delete(tokenName, token):
+    """
+    :param tokenName: The token name that need to be deleted
+    :param token: A currently valid token
+    :return: string of HTTP request
+    """
     headers = {"Authorization": "Bearer " + token}
     url = "https://api.upyun.com/oauth/tokens?name=%s"
     result = json.loads(requests.delete(url % tokenName, headers=headers).text)
-    print(result)
+    return str(result)
 
