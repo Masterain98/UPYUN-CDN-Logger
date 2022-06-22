@@ -9,7 +9,7 @@ from UpyunTools import tokenAPI, logAPI
 from db_pool.mysqlhelper import MySqLHelper
 
 
-@repeat(every().day.at('3:00'))
+@repeat(every().day.at('03:00'))
 def logger():
     try:
         # Create DB Connection
